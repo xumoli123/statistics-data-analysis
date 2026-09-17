@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：大模型的上下文（Context）</title>
+<style>
+  :root { --accent: #0f9d76; --bg: #ffffff; --panel: #f3faf7; --text: #1f2430; --muted: #5c6470; --border: #dcefe7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; line-height: 1.85; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 32px; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  nav { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; margin-bottom: 36px; font-size: 15px; }
+  nav a { color: var(--accent); text-decoration: none; margin-right: 14px; }
+  nav a:hover { text-decoration: underline; }
+  h2 { font-size: 22px; margin: 44px 0 12px; padding-left: 12px; border-left: 5px solid var(--accent); }
+  p, li { font-size: 16px; }
+  .quote { background: var(--panel); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 18px; margin: 14px 0; }
+  .def { font-weight: 600; }
+  code { background: #eaf5f1; border-radius: 4px; padding: 1px 6px; font-size: 14px; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 24px; }
+  .motto { font-style: italic; color: var(--muted); }
+  details { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>大模型的上下文（Context）</h1>
+  <div class="meta">由 concept-learning-generator 生成 · 深度：入门 · 日期：2026-09-08</div>
+</header>
+
+<nav>
+  <a href="#m1">1 通俗解释</a><a href="#m2">2 核心机制</a><a href="#m3">3 应用场景</a><a href="#m4">4 易混淆边界</a><a href="#m5">5 参考链接</a><a href="#m6">6 自测题</a>
+</nav>
+
+<h2 id="m1">一、个人通俗解释</h2>
+<div class="quote">类比：上下文就像大模型的<b>"工作台桌面"</b>——每轮对话时，模型能同时摊开看的所有材料（系统提示、历史聊天、贴进来的文档）都得摆在这张桌子上。但是桌面面积固定（即上下文窗口，Context Window），摊不下的东西只能收进抽屉（外部存储），需要时再拿出来。也就像你和朋友面对面聊天，双方都记得之前聊天的所有内容。</div>
+<p class="def">严格定义：上下文窗口是模型一次推理过程中能够"看到"并参与计算的全部 Token 范围，涵盖系统提示、对话历史、检索到的资料等所有输入内容，是大模型理解当前需求、生成连贯回答的依据。</p>
+
+<h2 id="m2">二、核心机制</h2>
+<ol>
+  <li><b>文本切分为 Token</b>：输入先经分词器（Tokenizer）切成最小单位 Token，窗口大小按 Token 计数，一个汉字约 1~2 个 Token。</li>
+  <li><b>自注意力（Self-Attention）</b>：窗口内每个 Token 都与其他所有 Token 交互计算，模型因此能"通读全桌"。代价是计算量随窗口长度平方增长，这正是窗口不能无限大的根本原因。</li>
+  <li><b>位置编码（Positional Encoding）</b>：注意力本身不感知顺序，需要位置信息（如现代模型常用的 RoPE）告诉模型谁在前谁在后。</li>
+  <li><b>窗口溢出处理</b>：内容超出窗口时，最旧的内容被截断或需要压缩、摘要、检索（RAG）等方式"请回桌面"。</li>
+  <li><b>KV Cache 加速</b>：已算过的历史 Token 的中间结果会被缓存，新一轮不必从头重算，是长对话能做到流畅的关键。</li>
+</ol>
+<p>它解决的前置问题：大模型本身是"无状态"的，每次推理都从零开始——没有上下文，模型连上一句话说什么都记不住。</p>
+
+<h2 id="m3">三、真实应用场景</h2>
+<ul>
+  <li><b>长文档问答</b>：场景 → 把整本书或代码库贴给 Claude/GPT 提问 → 依赖超长窗口（如 128K~1M Token）一次性容纳全文 → 效果：无需人工拆章摘句。</li>
+  <li><b>RAG 检索增强</b>：场景 → 知识库太大塞不进窗口，先检索出最相关的段落拼进上下文 → 效果：用小窗口装下"大知识"。</li>
+  <li><b>多轮对话</b>：场景 → 每轮把历史对话重新放入窗口 → 效果：模型能记住前文，保持连贯（对话超长后早期内容会被遗忘，就是窗口限制的体现）。</li>
+  <li><b>编程助手</b>：场景 → 把当前文件及相关代码同时放进窗口 → 效果：补全与修改能贴合项目真实上下文。</li>
+</ul>
+
+<h2 id="m4">四、易混淆边界</h2>
+<ul>
+  <li><b>上下文窗口 vs 训练数据量</b>：区别点 → 窗口是"一次能看多少"，训练数据是"学过多少"；适用情况 → 问模型没学过的资料要贴进窗口，而不是指望它"记住"；口诀：<span class="motto">"训练靠积累，推理靠桌面。"</span></li>
+  <li><b>上下文 vs 记忆（Memory）</b>：区别点 → 上下文随对话结束即消失，记忆是外部持久化存储；适用情况 → 短会话靠窗口，跨会话记住用户偏好靠记忆系统；口诀：<span class="motto">"上下文是便签，记忆是笔记本。"</span></li>
+  <li><b>窗口长度 vs 有效利用长度</b>：区别点 → 能塞进去 ≠ 能用好，研究发现长窗口中部信息容易被忽略（"Lost in the Middle"现象）；适用情况 → 关键信息尽量放开头或结尾；口诀：<span class="motto">"塞得下不等于看得清。"</span></li>
+</ul>
+
+<h2 id="m5">五、权威参考链接</h2>
+<ol>
+  <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need（arXiv 1706.03762）</a>——Transformer 与自注意力机制的原始论文，理解上下文为何"平方复杂度"必读。</li>
+  <li><a href="https://arxiv.org/abs/2307.03172" target="_blank">Lost in the Middle（arXiv 2307.03172）</a>——实证研究长上下文中部信息利用率下降，怀疑"长窗口是否万能"时看。</li>
+  
+
+<h2 id="m6">六、自测思考题</h2>
+<details><summary>1. 为什么上下文窗口不能无限大？</summary><p>参考要点：自注意力的计算量与存储随窗口长度呈平方级增长，成本与延迟都会失控；需要位置编码外推等技术才能扩展。</p></details>
+<details><summary>2. 模型本身"无状态"是什么意思？对话连贯性靠什么实现？</summary><p>参考要点：模型不会在两次调用之间保留任何信息；连贯性靠客户端把历史对话重新放进上下文窗口实现。</p></details>
+<details><summary>3. "Lost in the Middle"现象对实际应用有什么指导意义？</summary><p>参考要点：关键信息应放在上下文开头或结尾；不要迷信"窗口大就能随便塞"，要做信息筛选与排序。</p></details>
+<details><summary>4. RAG 和加大窗口都能解决"资料太多"的问题，各自适用场景是？</summary><p>参考要点：资料永久超大或需要实时更新时用 RAG（只取相关片段，省成本）；资料适中且需要通篇推理时直接放大窗口。</p></details>
+
+<footer>概念学习资料 · 生成器：concept-learning-generator · 建议配合第 5 节链接原文阅读</footer>
+</div>
+</body>
+</html>

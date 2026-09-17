@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：Agent（智能体）</title>
+<style>
+  :root { --accent: #4a6cf7; --bg: #ffffff; --panel: #f6f8fc; --text: #1f2430; --muted: #5c6470; --border: #e3e8f0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; line-height: 1.85; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 32px; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  nav { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; margin-bottom: 36px; font-size: 15px; }
+  nav a { color: var(--accent); text-decoration: none; margin-right: 14px; }
+  nav a:hover { text-decoration: underline; }
+  h2 { font-size: 22px; margin: 44px 0 12px; padding-left: 12px; border-left: 5px solid var(--accent); }
+  p, li { font-size: 16px; }
+  .quote { background: var(--panel); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 18px; margin: 14px 0; }
+  .def { font-weight: 600; }
+  code { background: #eef1f7; border-radius: 4px; padding: 1px 6px; font-size: 14px; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 24px; }
+  .motto { font-style: italic; color: var(--muted); }
+  details { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Agent（智能体）</h1>
+  <div class="meta">由 concept-learning-generator 生成 · 深度：入门 · 日期：2026-09-08</div>
+</header>
+
+<nav>
+  <a href="#m1">1 通俗解释</a><a href="#m2">2 核心机制</a><a href="#m3">3 应用场景</a><a href="#m4">4 易混淆边界</a><a href="#m5">5 参考链接</a><a href="#m6">6 自测题</a>
+</nav>
+
+<h2 id="m1">一、个人通俗解释</h2>
+<div class="quote">类比：普通大模型像一位学识渊博但只能"动嘴"的私人助理，你问一句他答一句；Agent 则是给这位顾问配上了<b>手脚、工具和待办清单</b>——他会自己拆解任务、翻资料、找工具、动手干活，看结果不对再次修改，直到完成最终要求。</div>
+<p class="def">严格定义：Agent（智能体）是以大模型（LLM）为"大脑"，能够自主的记住信息、拆解目标、规划步骤、调用外部工具并根据反馈循环迭代的系统。关键是"自主决定下一步做什么"，而不是被动一问一答。不需要一步步指挥，只需要说清最终要做什么，它就能自己搞定全流程。</p>
+
+<h2 id="m2">二、核心机制</h2>
+<ol>
+  <li><b>接收目标</b>：输入不再是单个问题，而是一个需要多步完成的任务（如"修复这个 bug 并提交"）。</li>
+  <li><b>规划与思考</b>：模型把大任务拆成小步骤。典型循环是 ReAct 模式：<code>思考 → 行动 → 观察结果 → 再思考</code>。</li>
+  <li><b>工具调用（Tool Use）</b>：模型输出结构化的"调用请求"（如搜索网页、执行代码、读写文件），环境执行后把结果喂回上下文。没有工具，模型只能靠记忆瞎猜外部信息。</li>
+  <li><b>记忆</b>：短期记忆靠上下文窗口（Context）装下当前进展；长期记忆可借助向量数据库把历史信息存起来、按需检索。</li>
+  <li><b>循环直到完成</b>：每轮观察反馈后决定"继续做、换方法，还是任务已完成"。没有这个闭环的话，一次回答错了就全盘皆输，无法自我纠正。</li>
+</ol>
+<p>它解决的前置问题：单次 LLM 调用只会"一问一答"，无法处理多步、需要外部信息和自我纠错的复杂任务。</p>
+
+<h2 id="m3">三、真实应用场景</h2>
+<ul>
+  <li><b>GitHub Copilot coding agent</b>：场景 → 用户提交一个 issue 后它自主读代码、改代码、跑测试 → 效果：把"提需求"到"收到 PR"变成半自动流程。</li>
+  <li><b>OpenAI Deep Research</b>：场景 → 面对一个研究问题，agent 自动拆解为多轮检索与阅读 → 效果：产出带引用来源的长篇研究报告。</li>
+  <li><b>Anthropic Claude Code</b>：场景 → 开发者用自然语言描述改动，agent 自主读写代码库、运行命令 → 效果：完成跨文件的工程任务而不只是补全代码。</li>
+  <li><b>电商客服 Agent</b>：场景 → 用户说"我要退货"，agent 自主调用订单、物流、退款接口完成全流程 → 效果：无需人工逐个系统查询。</li>
+</ul>
+
+<h2 id="m4">四、易混淆边界</h2>
+<ul>
+  <li><b>Agent vs 聊天机器人（Chatbot）</b>：区别点 → 有无自主规划与工具循环；适用情况 → 一问一答用 Chatbot，多步任务用 Agent；口诀：<span class="motto">"Chatbot 答话，Agent 干活。"</span></li>
+  <li><b>Agent vs 工作流（Workflow）</b>：区别点 → Workflow 由开发者预先写死每一步，Agent 由模型自己决定步骤；适用情况 → 流程固定、要求可控用 Workflow，路径不确定用 Agent；口诀：<span class="motto">"Workflow 走剧本，Agent 临场发挥。"</span></li>
+  <li><b>Agent vs 工具调用</b>：区别点 → 工具调用是单次动作，Agent 是围绕目标的完整决策循环；适用情况 → 单次查询直接调工具即可，需多轮配合才是 Agent；口诀：<span class="motto">"工具是招式，Agent 是会连招的武者。"</span></li>
+</ul>
+
+<h2 id="m5">五、权威参考链接</h2>
+<ol>
+  <li><a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting in Language Models（arXiv 2210.03629）</a>——提出"思考-行动-观察"循环的开山论文，想理解 Agent 核心循环时读。</li>
+  <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank">Lilian Weng: LLM Powered Autonomous Agents</a>——Agent 领域最著名的综述博客（规划/记忆/工具三件套），建立整体认知框架时看。</li>
+  <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">Anthropic: Building Effective Agents</a>——工业界视角讲何时该用 Workflow、何时该用 Agent，做工程选型时读。</li>
+  <li><a href="https://arxiv.org/abs/2302.04761" target="_blank">Toolformer（arXiv 2302.04761）</a>——让模型自己学会何时调用工具的早期论文，了解工具调用由来时看。</li>
+</ol>
+
+<h2 id="m6">六、自测思考题</h2>
+<details><summary>1. 为什么"单次大模型调用"不够，需要 Agent？</summary><p>参考要点：复杂任务需多步、需外部实时信息、需根据反馈自我纠正；单次调用没有循环与工具，做不到这三点。</p></details>
+<details><summary>2. 描述 ReAct 循环的三个基本动作。</summary><p>参考要点：思考（决定下一步）→ 行动（调用工具）→ 观察（接收结果并加入上下文），循环往复直到达成目标。</p></details>
+<details><summary>3. Workflow 和 Agent 的本质区别是什么？各自适合什么场景？</summary><p>参考要点：控制权归属不同——Workflow 的步骤由开发者写死（可控、可预测），Agent 的步骤由模型临场决定（灵活、适合开放任务）。对可靠性要求高的固定流程用 Workflow。</p></details>
+<details><summary>4. Agent 的"记忆"分哪两类？分别靠什么实现？</summary><p>参考要点：短期记忆靠上下文窗口保存当前会话内容；长期记忆靠外部存储（如向量数据库）持久化并按需检索。</p></details>
+
+<footer>概念学习资料 · 生成器：concept-learning-generator · 建议配合第 5 节链接原文阅读</footer>
+</div>
+</body>
+</html>

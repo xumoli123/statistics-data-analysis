@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习资料：Skill（技能）</title>
+<style>
+  :root { --accent: #d97706; --bg: #ffffff; --panel: #fdf8f1; --text: #1f2430; --muted: #5c6470; --border: #f2e3cd; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif; line-height: 1.85; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 16px; margin-bottom: 32px; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  .meta { color: var(--muted); font-size: 14px; }
+  nav { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; margin-bottom: 36px; font-size: 15px; }
+  nav a { color: var(--accent); text-decoration: none; margin-right: 14px; }
+  nav a:hover { text-decoration: underline; }
+  h2 { font-size: 22px; margin: 44px 0 12px; padding-left: 12px; border-left: 5px solid var(--accent); }
+  p, li { font-size: 16px; }
+  .quote { background: var(--panel); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 18px; margin: 14px 0; }
+  .def { font-weight: 600; }
+  code { background: #faf1e2; border-radius: 4px; padding: 1px 6px; font-size: 14px; }
+  a { color: var(--accent); }
+  ul, ol { padding-left: 24px; }
+  .motto { font-style: italic; color: var(--muted); }
+  details { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; margin: 10px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  footer { margin-top: 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Skill（技能）</h1>
+  <div class="meta">由 concept-learning-generator 生成 · 深度：入门 · 日期：2026-09-08</div>
+</header>
+
+<nav>
+  <a href="#m1">1 通俗解释</a><a href="#m2">2 核心机制</a><a href="#m3">3 应用场景</a><a href="#m4">4 易混淆边界</a><a href="#m5">5 参考链接</a><a href="#m6">6 自测题</a>
+</nav>
+
+<h2 id="m1">一、个人通俗解释</h2>
+<div class="quote">类比：Skill 就像给 AI 配的一本<b>标准指导说明书</b>——平时整整齐齐码在抽屉里，AI 只记得每本书的名字和一句话简介；一旦接到匹配的任务，才把对应那本抽出来翻开，照着里面的流程、模板和顺序干活。</div>
+<p class="def">严格定义：Skill 是一个以 <code>SKILL.md</code> 说明文件（可附带脚本、模板等资源）为核心的文件夹包，通过名称和描述被 Agent 感知、在任务匹配时按需加载，用来教会 Agent 一项具体、可复用的正确标准工作流程。</p>
+
+<h2 id="m2">二、核心机制</h2>
+<ol>
+  <li><b>文件夹即技能</b>：每个技能是一个目录，核心是带 frontmatter（名称 + 描述）的 <code>SKILL.md</code>，可附带脚本与模板资源。</li>
+  <li><b>轻量感知</b>：系统启动时 Agent 只"看到"每个技能的名称和一句话描述，几乎不占用上下文窗口——这是它能同时挂载数十个技能的前提。</li>
+  <li><b>按需加载（Progressive Disclosure，渐进式披露）</b>：当任务与描述匹配时，完整的 <code>SKILL.md</code> 内容才被读入上下文；不像系统提示那样常驻。</li>
+  <li><b>资源按需读取</b>：技能内附带的脚本、参考文档只在需要时执行或读取，进一步节省窗口。</li>
+  <li><b>组合扩展</b>：复杂技能可以在说明中引用其他技能，形成流程串联。</li>
+</ol>
+<p>它解决的前置问题：若把所有领域的操作流程都塞进系统提示，既会撑爆上下文窗口，又会互相干扰降低准确率；Skill 让知识"用时才取"。</p>
+
+<h2 id="m3">三、真实应用场景</h2>
+<ul>
+  <li><b>Anthropic Agent Skills 官方文档技能</b>：场景 → Claude 预置 docx / pptx / xlsx 等技能 → 需要处理对应 Office 文件时自动加载 → 效果：按官方规范生成文件而非凭记忆瞎猜格式。</li>
+  <li><b>团队自定义技能</b>：场景 → 公司把周报格式、代码评审清单写成 SKILL.md → 团队所有 Agent 会话共享同一套做法 → 效果：输出风格统一、可版本化管理。</li>
+  <li><b>Claude Code 中的技能</b>：场景 → 开发者把"发布流程"做成技能，对话中以斜杠命令触发 → 效果：多步运维操作一条命令复现。</li>
+  <li><b>个人工作流沉淀</b>：场景 → 用户让 AI 把本次多步任务的成功做法存为技能 → 下次一句话复用 → 效果：经验从"聊天记录"变成"可执行资产"。</li>
+</ul>
+
+<h2 id="m4">四、易混淆边界</h2>
+<ul>
+  <li><b>Skill vs 工具（Tool）</b>：区别点 → 工具是单个可调用的接口（如"搜索网页"），技能是打包的流程知识（知道何时、按什么顺序用哪些工具）；适用情况 → 加能力用工具，传方法用技能；口诀：<span class="motto">"工具是零件，技能是装配说明书。"</span></li>
+  <li><b>Skill vs MCP</b>：区别点 → MCP 负责把 Agent 连到外部数据与服务（连接层），Skill 负责教会 Agent 做事的方法（知识层）；适用情况 → 两者常配合：MCP 提供接口，技能提供用法；口诀：<span class="motto">"MCP 通水管，Skill 交手艺。"</span></li>
+  <li><b>Skill vs 系统提示（System Prompt）</b>：区别点 → 系统提示常驻且全量加载，技能按需加载；适用情况 → 全局规则放系统提示，特定任务流程做成技能；口诀：<span class="motto">"宪法常在墙上，手册用时才翻。"</span></li>
+</ul>
+
+<h2 id="m5">五、权威参考链接</h2>
+<ol>
+  <li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank">Anthropic Engineering: Equipping agents for the real world with Agent Skills</a>——Skill 概念的官方出处，讲设计哲学与渐进式披露机制，建立认知必读。</li>
+  <li><a href="https://arxiv.org/abs/2304.08354" target="_blank">Tool Learning with Foundation Models（arXiv 2304.08354）</a>——清华大学团队的工具学习系统综述，讲清模型如何拆解任务、选择与组合工具，动手设计技能流程时读。</li>
+  <li><a href="https://arxiv.org/abs/2305.15334" target="_blank">Gorilla: Large Language Model Connected with Massive APIs（arXiv 2305.15334）</a>——UC Berkeley 的 API 调用研究，对照理解"工具调用"这一相邻概念，厘清 Skill 与 Tool 的边界时读。</li>
+  <li><a href="https://modelcontextprotocol.io" target="_blank">Model Context Protocol（MCP）官网</a>——理解 Skill 与 MCP 的分工互补关系时看。</li>
+</ol>
+
+<h2 id="m6">六、自测思考题</h2>
+<details><summary>1. Skill 为什么采用"按需加载"而不是全部写进系统提示？</summary><p>参考要点：全量加载会占用大量上下文窗口且多领域知识互相干扰；按需加载让窗口保持干净，同时支持挂载更多技能。</p></details>
+<details><summary>2. 一个最小可用的 Skill 文件夹包含什么？</summary><p>参考要点：一个目录 + 一个带 frontmatter（name、description）的 SKILL.md；描述写得越准确，Agent 触发越可靠；可选附带脚本与模板。</p></details>
+<details><summary>3. "渐进式披露"的三个层级分别是什么？</summary><p>参考要点：第一级只暴露名称+描述（常驻、极轻）；第二级任务匹配时加载 SKILL.md 正文；第三级执行中按需读取附带资源文件。</p></details>
+<details><summary>4. 如果要"让 AI 每次都按公司模板写周报"，Skill、工具、MCP 各扮演什么角色？</summary><p>参考要点：技能承载周报的结构化流程与模板知识；工具/MCP 提供读取数据、写入文档的接口能力；技能指导如何组合这些工具完成全流程。</p></details>
+
+<footer>概念学习资料 · 生成器：concept-learning-generator · 建议配合第 5 节链接原文阅读</footer>
+</div>
+</body>
+</html>
